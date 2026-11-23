@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reels Studio - Editofy</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;font-family:'Inter',sans-serif;margin:0;padding:0}
+body{background:#F8F8F8;padding:16px}
+.box{max-width:460px;margin:0 auto;background:#fff;border:1px solid #E5E7EB;border-radius:24px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+h1{font-size:22px;text-align:center}
+.sub{font-size:13px;color:#6B7280;text-align:center;margin:6px 0 16px}
+.upload{background:#F9FAFB;border:2px dashed #FC6222;border-radius:16px;padding:20px;text-align:center}
+.btn{width:100%;padding:15px;border:0;border-radius:99px;font-weight:800;font-size:15px;cursor:pointer;margin-top:10px}
+.btn-orange{background:#FC6222;color:#fff}
+.btn-black{background:#111;color:#fff}
+.btn:disabled{opacity:.5}
+.small{font-size:11px;color:#9CA3AF;text-align:center;margin-top:10px;line-height:18px}
+.clip{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:10px;margin-top:8px;font-size:13px;text-align:left}
+.pro{background:#FFF7ED;border-radius:14px;padding:14px;font-size:13px;line-height:22px;margin-top:14px;display:none}
+.freebox{background:#FFF7ED;border:2px solid #FC6222;border-radius:16px;padding:14px;text-align:center;margin-top:14px}
+.feature{background:#FFF7ED;border-radius:14px;padding:14px;font-size:13px;line-height:24px;margin-top:14px;text-align:left}
+#statusBox{display:none;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:16px;padding:16px;text-align:center;margin-top:14px}
+#progressBar{width:100%;height:10px;background:#E5E7EB;border-radius:99px;overflow:hidden;margin-top:10px}
+#progressFill{height:100%;width:0%;background:#FC6222;transition:width .3s}
+#videoResult{display:none;margin-top:14px;text-align:center}
+#videoResult video{width:100%;border-radius:16px}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>🎬 Reels Studio</h1>
+<p class="sub">1 Video or 4-5 Videos - All will join and become 1 Pro Reel</p>
+<div class="upload">
+<p style="font-size:30px">🎬</p>
+<p style="font-weight:800;font-size:15px;margin:8px 0 4px">Upload Video - 1 or 5, both will work</p>
+<p style="font-size:12px;color:#6B7280">If you upload more than 1, all will join and become 1 Reel<br>Up to 90 Sec - Pro Joining</p>
+<input type="file" id="videoInput" accept="video/*" multiple style="display:none" onchange="showClips(this)">
+<button class="btn btn-orange" onclick="document.getElementById('videoInput').click()">+ Select Video</button>
+<div id="clipList"></div>
+</div>
+<div class="freebox">
+<b style="font-size:16px">FREE ✨ - 1 Reel</b><br>
+<span style="font-size:20px;font-weight:900;color:#FC6222">₹0 - 1080p Download</span><br>
+<span style="font-size:12px;color:#6B7280">With Watermark - You can download it</span>
+</div>
+<div class="feature">
+<b>What you will get in FREE:</b><br>
+✅ Pro Joining - 5 Clips will join and become 1 Reel<br>
+✅ Remove Gap - 0 Sec Gap<br>
+✅ Smooth Transition - No cut will be visible<br>
+✅ Auto Voice Clean - Wind / Crowd noise will be removed<br>
+✅ Cinematic Color - All Clips will have same color<br>
+✅ Same Audio Level for all clips<br>
+✅ Up to 90 Sec - 1080p Download<br>
+✅ With Watermark
+</div>
+<div class="pro" id="proBox">
+🎬 <b>Pro Joining will happen...</b><br>
+✅ Remove Gap - 0 Sec Gap<br>
+✅ Smooth Transition - Cut will not be visible<br>
+✅ Make all Clips color same<br>
+✅ Make audio same level<br>
+<b>It will look like a single video 🔥</b>
+</div>
+<button class="btn btn-black" id="editBtn" onclick="startEdit()">Edit Now → Ready in 2 Min 🚀</button>
+<div id="statusBox">
+<b id="statusText">Uploading...</b>
+<div id="progressBar"><div id="progressFill"></div></div>
+<p class="small" id="statusSub">Please wait, don't close this page</p>
+</div>
+<div id="videoResult">
+<b style="font-size:16px">✅ Your Reel is Ready!</b><br><br>
+<video id="finalVideo" controls playsinline></video><br>
+<a id="downloadBtn" href="#" download="editofy-reel.mp4"><button class="btn btn-orange" style="margin-top:12px">⬇ Download Reel - 1080p</button></a>
+</div>
+<p class="small">Reels - Up to 90 Sec ⏱️<br>If video is longer, first 90 Sec will be used<br>100% FREE - 1 Reel - 1080p</p>
+</div>
+<script>
+var selectedClips = [];
+var SERVER = "https://editofy-server.onrender.com";
+function showClips(input){
+  selectedClips = Array.from(input.files);
+  var html = '';
+  selectedClips.forEach(function(f,i){
+    html += '<div class="clip">✅ Clip '+(i+1)+' - '+f.name+'</div>';
+  });
+  if(selectedClips.length > 1){
+    html += '<div style="margin-top:10px;color:#22C55E;font-weight:800;font-size:13px">🔥 '+selectedClips.length+' Clips will join and become 1 Reel! It will look like a single video.</div>';
+    document.getElementById('proBox').style.display='block';
+  } else if(selectedClips.length == 1){
+    html += '<div style="margin-top:10px;font-weight:700;font-size:13px">1 Video - Same video will be edited</div>';
+    document.getElementById('proBox').style.display='none';
+  }
+  document.getElementById('clipList').innerHTML = html;
+}
+async function startEdit(){
+  if(selectedClips.length==0){ alert('Please upload a video first! 😅'); return; }
+  var btn = document.getElementById('editBtn');
+  btn.disabled = true;
+  btn.innerText = 'Editing... Please Wait ⏳';
+  document.getElementById('statusBox').style.display='block';
+  document.getElementById('videoResult').style.display='none';
+  document.getElementById('statusText').innerText = 'Uploading to server...';
+  document.getElementById('progressFill').style.width = '20%';
+  try{
+    var form = new FormData();
+    selectedClips.forEach(function(f){ form.append('videos', f); });
+    document.getElementById('progressFill').style.width = '50%';
+    document.getElementById('statusText').innerText = 'Editing - Pro Joining + Voice Clean + Color...';
+    var res = await fetch(SERVER + '/merge', {method:'POST', body: form});
+    if(!res.ok) throw new Error('Server error: ' + res.status);
+    var j = await res.json();
+    if(j.error) throw new Error(j.error);
+    var url = j.url;
+    if(url.startsWith('/')) url = SERVER + url;
+    showResult(url);
+  }catch(e){
+    alert('Server me problem hai: ' + e.message + '\n\nServer ko 1 min baad fir try karo.');
+    btn.disabled = false;
+    btn.innerText = 'Edit Now → Ready in 2 Min 🚀';
+    document.getElementById('statusBox').style.display='none';
+  }
+}
+function showResult(url){
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('statusText').innerText = 'Done! ✅';
+  document.getElementById('statusSub').innerText = 'Your reel is ready';
+  var v = document.getElementById('finalVideo');
+  v.src = url;
+  var dl = document.getElementById('downloadBtn');
+  dl.href = url;
+  document.getElementById('videoResult').style.display='block';
+  document.getElementById('editBtn').innerText = 'Edit Again 🔄';
+  document.getElementById('editBtn').disabled = false;
+  document.getElementById('videoResult').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
