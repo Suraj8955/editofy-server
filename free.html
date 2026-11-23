@@ -108,13 +108,12 @@ async function startEdit(){
     var form = new FormData();
     selectedClips.forEach(function(f){ form.append('videos', f); });
     document.getElementById('progressFill').style.width = '50%';
-    document.getElementById('statusText').innerText = 'Editing - Pro Joining + Voice Clean + Color...';
+    document.getElementById('statusText').innerText = 'Editing - Pro Joining...';
     var res = await fetch(SERVER + '/merge', {method:'POST', body: form});
     if(!res.ok) throw new Error('Server error: ' + res.status);
-    var j = await res.json();
-    if(j.error) throw new Error(j.error);
-    var url = j.url;
-    if(url.startsWith('/')) url = SERVER + url;
+    var blob = await res.blob();
+    if(blob.size < 1000) throw new Error('Video bahut chhota bana, fir try karo');
+    var url = URL.createObjectURL(blob);
     showResult(url);
   }catch(e){
     alert('Server me problem hai: ' + e.message + '\n\nServer ko 1 min baad fir try karo.');
@@ -138,4 +137,4 @@ function showResult(url){
 }
 </script>
 </body>
-</html>
+  </html>
