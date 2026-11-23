@@ -7,6 +7,7 @@ const { spawn } = require('child_process');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static('.'));
 if(!fs.existsSync('uploads')) fs.mkdirSync('uploads');
 if(!fs.existsSync('outputs')) fs.mkdirSync('outputs');
 const upload = multer({ dest: 'uploads/', limits: { fileSize: 500 * 1024 * 1024 } });
